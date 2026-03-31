@@ -21,7 +21,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with: # 将下述可执行文件 release 上去
-        token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v3.1.1-${{ env.TAG_DATE }}
           name: v3.1.1-${{ env.TAG_DATE }}
           files: |
