@@ -14,23 +14,28 @@ for pl in ${PLATFORMS}; do
     export GOOS=$(echo ${pl} | cut -d'/' -f1)
     export GOARCH=$(echo ${pl} | cut -d'/' -f2)
     export TARGET=${TARGET_DIR}/${DIST_PREFIX}_${GOOS}_${GOARCH}
+
+    # Windows 扩展名
     if [ "${GOOS}" == "windows" ]; then
-        export TARGET=${TARGET_DIR}/${DIST_PREFIX}_${GOOS}_${GOARCH}.exe
+        TARGET="${TARGET}.exe"
     fi
 
     echo "build => ${TARGET}"
+
+    # 关键：禁用 CGO → 静态编译 → 不依赖 GLIBC
+    export CGO_ENABLED=0
+
     if [ "${DEBUG_MODE}" == "debug" ]; then
         go build -trimpath -gcflags "all=-N -l" -o ${TARGET} \
-            -ldflags    "-X 'main.version=${BUILD_VERSION}' \
-                        -X 'main.buildDate=${BUILD_DATE}' \
-                        -X 'main.commitID=${COMMIT_SHA1}'\
-                        -w -s"
+            -ldflags "-w -s \
+                      -X 'main.version=${BUILD_VERSION}' \
+                      -X 'main.buildDate=${BUILD_DATE}' \
+                      -X 'main.commitID=${COMMIT_SHA1}'"
     else
         go build -trimpath -o ${TARGET} \
-            -ldflags    "-X 'main.version=${BUILD_VERSION}' \
-                        -X 'main.buildDate=${BUILD_DATE}' \
-                        -X 'main.commitID=${COMMIT_SHA1}'\
-                        -w -s"
+            -ldflags "-w -s \
+                      -X 'main.version=${BUILD_VERSION}' \
+                      -X 'main.buildDate=${BUILD_DATE}' \
+                      -X 'main.commitID=${COMMIT_SHA1}'"
     fi
 done
-
